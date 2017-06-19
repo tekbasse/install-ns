@@ -7,8 +7,7 @@ while [ x"$1" != x ] ; do
     case $1 in
         clean) clean=1
             shift
-            rm /etc/init/
-           continue;;
+            continue;;
         build) build=1
             shift
             continue;;
