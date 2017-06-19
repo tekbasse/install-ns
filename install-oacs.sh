@@ -173,11 +173,11 @@ SETTINGS   OpenACS version              ${oacs_core_tag}
            PostgresSQL user             ${pg_user}
            PostgreSQL directory         ${pg_dir}
            Database name                ${db_name}
-           Naviserver install directory ${ns_install_dir}
-           Naviserver src directory     ${ns_src_dir}
-           Naviserver modules directory ${modules_src_dir}
-           Naviserver user              ${ns_user}
-           Naviserver group             ${ns_group}
+           NaviServer install directory ${ns_install_dir}
+           NaviServer src directory     ${ns_src_dir}
+           NaviServer modules directory ${modules_src_dir}
+           NaviServer user              ${ns_user}
+           NaviServer group             ${ns_group}
            Install DotLRN               ${install_dotlrn}
            Make command                 ${make}
            Type command                 ${type}
