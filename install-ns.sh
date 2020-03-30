@@ -7,12 +7,12 @@ build=0
 while [ x"$1" != x ] ; do
     case $1 in
         clean) clean_only=1
-	        do_clean=1
-            shift
-            continue;;
+	           do_clean=1
+               shift
+               continue;;
         build) build=1
-            shift
-            continue;;
+               shift
+               continue;;
         *)  echo "argument '$1' ignored"
             shift
             continue;;
@@ -116,11 +116,11 @@ if [ $uname = "Darwin" ] ; then
     
     
     if [ $with_postgres = "1" ] ; then
-    
-	# Preconfigured for PostgreSQL 12 installed via MacPorts
-	pg_incl=/opt/local/include/postgresql12/
-	pg_lib=/opt/local/lib/postgresql12/
-	pg_packages="postgresql12 postgresql12-server"
+        
+	    # Preconfigured for PostgreSQL 12 installed via MacPorts
+	    pg_incl=/opt/local/include/postgresql12/
+	    pg_lib=/opt/local/lib/postgresql12/
+	    pg_packages="postgresql12 postgresql12-server"
 
     fi
 else
@@ -173,10 +173,10 @@ else
             exit
         fi
     elif [ ${uname} = "OpenBSD" ] ; then
-	make="gmake"
-	#setenv LIBS=-lpthread
+	    make="gmake"
+	    #setenv LIBS=-lpthread
     	pg_incl=/usr/local/include/postgresql
-	pg_lib=/usr/local/lib
+	    pg_lib=/usr/local/lib
         openbsd=1
     fi
 fi
@@ -201,7 +201,9 @@ This script requires these packages:
   wget curl
   zip unzip
   ${pg_packages} ${autoconf} ${mercurial} ${git} ${mongodb}
-Please verify that they are installed before running script."
+Please verify that they are installed before running script.
+"
+    
 fi
 
 echo "
@@ -247,11 +249,15 @@ SETTINGS   Dev install? 1=yes     ${dev_p}
            With PostgreSQL        ${with_postgres}
            With PostgreSQL driver ${with_postgres_driver}
            PostgreSQL user        ${pg_user}
+           uname                  ${uname}
+           freebsd                ${freebsd}
+"
+
+if [ $with_postgres = "1" ] ; then
+    echo "
            postgres/include       ${pg_incl}
            postgres/lib           ${pg_lib}
            PostgreSQL Packages    ${pg_packages}
-           uname                  ${uname}
-           freebsd                ${freebsd}
 "
 fi
 
@@ -382,194 +388,194 @@ if [ $debian = "1" ] ; then
     # On Debian/Ubuntu, make sure we have zlib installed, otherwise
     # NaviServer can't provide compression support
     apt-get install make ${autoconf} gcc zlib1g-dev wget curl zip unzip openssl libssl-dev ${pg_packages} ${mercurial} ${git} ${mongodb}
-fi
-if [ $redhat = "1" ] ; then
-    # packages for FC/RHL
-    if [ -x "/usr/bin/dnf" ] ; then
-        pkgmanager=/usr/bin/dnf
-    else
-        pkgmanager=yum
-    fi
+         fi
+          if [ $redhat = "1" ] ; then
+              # packages for FC/RHL
+              if [ -x "/usr/bin/dnf" ] ; then
+                  pkgmanager=/usr/bin/dnf
+              else
+                  pkgmanager=yum
+              fi
 
-    ${pkgmanager} install make ${autoconf} automake gcc zlib zlib-devel wget curl zip unzip openssl openssl-devel ${pg_packages} ${mercurial} ${git} ${mongodb}
-    
-fi
+              ${pkgmanager} install make ${autoconf} automake gcc zlib zlib-devel wget curl zip unzip openssl openssl-devel ${pg_packages} ${mercurial} ${git} ${mongodb}
+              
+          fi
 
-if [ $macosx = "1" ] ; then
-    port install make ${autoconf} zlib wget curl zip unzip openssl ${pg_packages} ${mercurial} ${git} ${mongodb}
-fi
+          if [ $macosx = "1" ] ; then
+              port install make ${autoconf} zlib wget curl zip unzip openssl ${pg_packages} ${mercurial} ${git} ${mongodb}
+          fi
 
-if [ $openbsd = "1" ] ; then
-    #export PKG_PATH=https://ftp.eu.openbsd.org/pub/OpenBSD/6.3/packages/`machine -a`/
-    export AUTOCONF_VERSION=2.69
-    export AUTOMAKE_VERSION=1.15
-    #
-    # OpenBSD does not require a build with OpenSSL (libreSSL works as
-    # well), but NaviServer gets more functionality by using recent
-    # versions of OpenSSL.
-    #
-    pkg_add gcc openssl wget ${git} curl zip unzip bash gmake ${mercurial} ${mongodb} ${pg_packages} autoconf-2.69p2 automake-1.15.1
-fi
+          if [ $openbsd = "1" ] ; then
+              #export PKG_PATH=https://ftp.eu.openbsd.org/pub/OpenBSD/6.3/packages/`machine -a`/
+              export AUTOCONF_VERSION=2.69
+              export AUTOMAKE_VERSION=1.15
+              #
+              # OpenBSD does not require a build with OpenSSL (libreSSL works as
+              # well), but NaviServer gets more functionality by using recent
+              # versions of OpenSSL.
+              #
+              pkg_add gcc openssl wget ${git} curl zip unzip bash gmake ${mercurial} ${mongodb} ${pg_packages} autoconf-2.69p2 automake-1.15.1
+          fi
 
-if [ $sunos = "1" ] ; then
-    # packages for OpenSolaris/OmniOS
-    pkg install pkg://omnios/developer/versioning/git mercurial ${autoconf} automake /developer/gcc51g zlib wget \
-        curl compress/zip compress/unzip \
-	    ${pg_packages} ${mercurial} ${git} ${mongodb}
-    pkg install \
-	    developer/object-file \
-	    developer/linker \
-	    developer/library/lint \
-	    developer/build/gnu-make \
-	    system/header \
-	    system/library/math/header-math \
-            archiver/gnu-tar
+          if [ $sunos = "1" ] ; then
+              # packages for OpenSolaris/OmniOS
+              pkg install pkg://omnios/developer/versioning/git mercurial ${autoconf} automake /developer/gcc51g zlib wget \
+                  curl compress/zip compress/unzip \
+	              ${pg_packages} ${mercurial} ${git} ${mongodb}
+              pkg install \
+	              developer/object-file \
+	              developer/linker \
+	              developer/library/lint \
+	              developer/build/gnu-make \
+	              system/header \
+	              system/library/math/header-math \
+                  archiver/gnu-tar
 
-    #ln -s /opt/gcc-4.8.1/bin/gcc /bin/gcc
-             tar="gtar"
-fi
+              #ln -s /opt/gcc-4.8.1/bin/gcc /bin/gcc
+              tar="gtar"
+          fi
 
-#if [ $freebsd = "1" ] ; then
-# Just give a message in the main screen about these dependencies.
-# FreeBSD offers multiple package managers. Portmaster, ports, binaries..
+          #if [ $freebsd = "1" ] ; then
+          # Just give a message in the main screen about these dependencies.
+          # FreeBSD offers multiple package managers. Portmaster, ports, binaries..
 
-#portmaster -D --no-confirm devel/gmake devel/llvm security/openssl devel/automake ftp/wget ftp/curl archivers/zip archivers/unzip devel/autoconf devel/git devel/cvs devel/mercurial ${pg_packages} ${mongodb}
-# portmaster -aD --no-confirm
-#fi
+          #portmaster -D --no-confirm devel/gmake devel/llvm security/openssl devel/automake ftp/wget ftp/curl archivers/zip archivers/unzip devel/autoconf devel/git devel/cvs devel/mercurial ${pg_packages} ${mongodb}
+          # portmaster -aD --no-confirm
+          #fi
 
-echo "------------------------ Downloading sources ----------------------------"
-# Exit on download errors
-set -o errexit
+          echo "------------------------ Downloading sources ----------------------------"
+          # Exit on download errors
+          set -o errexit
 
-if [ ! -f tcl${version_tcl}-src.tar.gz ] ; then
-    echo wget ${wget_options} https://downloads.sourceforge.net/sourceforge/tcl/tcl${version_tcl}-src.tar.gz
-    wget ${wget_options} https://downloads.sourceforge.net/sourceforge/tcl/tcl${version_tcl}-src.tar.gz
-fi
-# All versions of tcllib up to 1.15 were named tcllib-*.
-# tcllib-1.16 was named a while Tcllib-1.16 (capital T), but has been renamed later
-# to the standard naming conventions. tcllib-1.17 is fine again.
-if [ ! -f tcllib-${version_tcllib}.tar.bz2 ] ; then
-    echo wget ${wget_options} https://downloads.sourceforge.net/sourceforge/tcllib/${tcllib_dirname}-${version_tcllib}.tar.bz2
-    wget ${wget_options} https://downloads.sourceforge.net/sourceforge/tcllib/${tcllib_dirname}-${version_tcllib}.tar.bz2
-fi
+          if [ ! -f tcl${version_tcl}-src.tar.gz ] ; then
+              echo wget ${wget_options} https://downloads.sourceforge.net/sourceforge/tcl/tcl${version_tcl}-src.tar.gz
+              wget ${wget_options} https://downloads.sourceforge.net/sourceforge/tcl/tcl${version_tcl}-src.tar.gz
+          fi
+          # All versions of tcllib up to 1.15 were named tcllib-*.
+          # tcllib-1.16 was named a while Tcllib-1.16 (capital T), but has been renamed later
+          # to the standard naming conventions. tcllib-1.17 is fine again.
+          if [ ! -f tcllib-${version_tcllib}.tar.bz2 ] ; then
+              echo wget ${wget_options} https://downloads.sourceforge.net/sourceforge/tcllib/${tcllib_dirname}-${version_tcllib}.tar.bz2
+              wget ${wget_options} https://downloads.sourceforge.net/sourceforge/tcllib/${tcllib_dirname}-${version_tcllib}.tar.bz2
+          fi
 
-if [ ! ${version_ns} = "HEAD" ] ; then
-    if [ ! -f naviserver-${version_ns}.tar.gz ] ; then
-        echo wget ${wget_options} https://downloads.sourceforge.net/sourceforge/naviserver/naviserver-${version_ns}.tar.gz
-	    wget ${wget_options} https://downloads.sourceforge.net/sourceforge/naviserver/naviserver-${version_ns}.tar.gz
-    fi
-else
-    if [ ! -d naviserver ] ; then
-	    git clone https://bitbucket.org/naviserver/naviserver
-    else
-	    cd naviserver
-	    git pull
-	    cd ..
-    fi
+          if [ ! ${version_ns} = "HEAD" ] ; then
+              if [ ! -f naviserver-${version_ns}.tar.gz ] ; then
+                  echo wget ${wget_options} https://downloads.sourceforge.net/sourceforge/naviserver/naviserver-${version_ns}.tar.gz
+	              wget ${wget_options} https://downloads.sourceforge.net/sourceforge/naviserver/naviserver-${version_ns}.tar.gz
+              fi
+          else
+              if [ ! -d naviserver ] ; then
+	              git clone https://bitbucket.org/naviserver/naviserver
+              else
+	              cd naviserver
+	              git pull
+	              cd ..
+              fi
 
-fi
+          fi
 
-cd ${build_dir}
-if [ ! ${version_modules} = "HEAD" ] ; then
-    if [ ! -f naviserver-${version_modules}-modules.tar.gz ] ; then
-        echo wget ${wget_options} https://downloads.sourceforge.net/sourceforge/naviserver/naviserver-${version_modules}-modules.tar.gz
-	    wget ${wget_options} https://downloads.sourceforge.net/sourceforge/naviserver/naviserver-${version_modules}-modules.tar.gz
-    fi
-else
-    if [ ! -d modules ] ; then
-        mkdir modules
-    fi
-    
-    cd modules
-    for d in nsdbbdb nsdbtds nsdbsqlite nsdbpg nsdbmysql \
-	    nsocaml nssmtpd nstk nsdns nsfortune \
-	    nssnmp nsicmp nsudp nsaccess nschartdir \
-	    nsexample nsgdchart nssavi nssys nszlib nsaspell \
-	    nsclamav nsexpat nsimap nssip nstftpd \
-	    nssyslogd nsldapd nsradiusd nsphp nsstats nsconf \
-	    nsdhcpd nsrtsp nsauthpam nsmemcache \
-	    nsvfs nsdbi nsdbipg nsdbilite nsdbimy
-    do
-	    if [ ! -d $d ] ; then
-	        git clone http://bitbucket.org/naviserver/$d
-	    else
-	        cd $d
-	        git pull
-	        cd ..
-	    fi
-    done
-fi
+          cd ${build_dir}
+          if [ ! ${version_modules} = "HEAD" ] ; then
+              if [ ! -f naviserver-${version_modules}-modules.tar.gz ] ; then
+                  echo wget ${wget_options} https://downloads.sourceforge.net/sourceforge/naviserver/naviserver-${version_modules}-modules.tar.gz
+	              wget ${wget_options} https://downloads.sourceforge.net/sourceforge/naviserver/naviserver-${version_modules}-modules.tar.gz
+              fi
+          else
+              if [ ! -d modules ] ; then
+                  mkdir modules
+              fi
+              
+              cd modules
+              for d in nsdbbdb nsdbtds nsdbsqlite nsdbpg nsdbmysql \
+	                           nsocaml nssmtpd nstk nsdns nsfortune \
+	                           nssnmp nsicmp nsudp nsaccess nschartdir \
+	                           nsexample nsgdchart nssavi nssys nszlib nsaspell \
+	                           nsclamav nsexpat nsimap nssip nstftpd \
+	                           nssyslogd nsldapd nsradiusd nsphp nsstats nsconf \
+	                           nsdhcpd nsrtsp nsauthpam nsmemcache \
+	                           nsvfs nsdbi nsdbipg nsdbilite nsdbimy
+              do
+	              if [ ! -d $d ] ; then
+	                  git clone http://bitbucket.org/naviserver/$d
+	              else
+	                  cd $d
+	                  git pull
+	                  cd ..
+	              fi
+              done
+          fi
 
-cd ${build_dir}
-if [ ! -f thread${version_thread}.tar.gz ] ; then
-    wget ${wget_options} https://downloads.sourceforge.net/sourceforge/tcl/thread${version_thread}.tar.gz
-fi
+          cd ${build_dir}
+          if [ ! -f thread${version_thread}.tar.gz ] ; then
+              wget ${wget_options} https://downloads.sourceforge.net/sourceforge/tcl/thread${version_thread}.tar.gz
+          fi
 
-if [ ! ${version_xotcl} = "HEAD" ] ; then
-    if [ ! -f nsf${version_xotcl}.tar.gz ] ; then
-	    wget ${wget_options} https://downloads.sourceforge.net/sourceforge/next-scripting/nsf${version_xotcl}.tar.gz
-    fi
-else
-    if [ ! -d nsf ] ; then
-	    git clone git://alice.wu-wien.ac.at/nsf
-    else
-	    cd nsf
-	    git pull
-	    cd ..
-    fi
-fi
+          if [ ! ${version_xotcl} = "HEAD" ] ; then
+              if [ ! -f nsf${version_xotcl}.tar.gz ] ; then
+	              wget ${wget_options} https://downloads.sourceforge.net/sourceforge/next-scripting/nsf${version_xotcl}.tar.gz
+              fi
+          else
+              if [ ! -d nsf ] ; then
+	              git clone git://alice.wu-wien.ac.at/nsf
+              else
+	              cd nsf
+	              git pull
+	              cd ..
+              fi
+          fi
 
-if [ $with_mongo = "1" ] ; then
-    if [ ! -d mongo-c-driver ] ; then
-	    git clone https://github.com/mongodb/mongo-c-driver
-    else
-	    cd mongo-c-driver
-	    git pull
-	    cd ..
-    fi
-fi
+          if [ $with_mongo = "1" ] ; then
+              if [ ! -d mongo-c-driver ] ; then
+	              git clone https://github.com/mongodb/mongo-c-driver
+              else
+	              cd mongo-c-driver
+	              git pull
+	              cd ..
+              fi
+          fi
 
-if [ ! ${version_tdom} = "GIT" ] ; then
-    if [ ! -f ${tdom_tar} ] ; then
-	    #wget --no-check-certificate https://cloud.github.com/downloads/tDOM/tdom/tDOM-${version_tdom}.tgz
-	    #curl -L -O  https://github.com/downloads/tDOM/tdom/tDOM-${version_tdom}.tgz
-        #
-        # Get a version of tdom, which is compatible with Tcl
-        # 8.6. Unfortunately, the released version is not.
-        #
-        rm  -rf ${tdom_base} ${tdom_tar} 
-	#curl -L -O https://github.com/tDOM/tdom/tarball/4be49b70cabea18c90504d1159fd63994b323234
-	#${tar} zxvf 4be49b70cabea18c90504d1159fd63994b323234
-	#mv tDOM-tdom-4be49b7 tDOM-${version_tdom}
-	curl -L -O http://tdom.org/downloads/${tdom_tar}
-	${tar} zxvf ${tdom_tar} 
-    fi
-else
-
-
-    if [ ! -f "tdom/${version_tdom_git}" ] ; then
-	#
-	# get the newest version of tDOM
-	#
-	rm -rf tdom
-	echo "get  tDOM via: git clone https://github.com/tDOM/tdom.git"
-	git clone https://github.com/tDOM/tdom.git
-	# cd tdom
-	# git checkout 'master@{2012-12-31 00:00:00}'
-       # cd ..
-    fi
-fi
-
-#exit
-echo "------------------------ Installing Tcl ---------------------------------"
-set -o errexit
-
-${tar} xfz tcl${version_tcl}-src.tar.gz
+          if [ ! ${version_tdom} = "GIT" ] ; then
+              if [ ! -f ${tdom_tar} ] ; then
+	              #wget --no-check-certificate https://cloud.github.com/downloads/tDOM/tdom/tDOM-${version_tdom}.tgz
+	              #curl -L -O  https://github.com/downloads/tDOM/tdom/tDOM-${version_tdom}.tgz
+                  #
+                  # Get a version of tdom, which is compatible with Tcl
+                  # 8.6. Unfortunately, the released version is not.
+                  #
+                  rm  -rf ${tdom_base} ${tdom_tar} 
+	              #curl -L -O https://github.com/tDOM/tdom/tarball/4be49b70cabea18c90504d1159fd63994b323234
+	              #${tar} zxvf 4be49b70cabea18c90504d1159fd63994b323234
+	              #mv tDOM-tdom-4be49b7 tDOM-${version_tdom}
+	              curl -L -O http://tdom.org/downloads/${tdom_tar}
+	              ${tar} zxvf ${tdom_tar} 
+              fi
+          else
 
 
-if [ $with_system_malloc = "1" ] ; then
-    cd tcl${version_tcl}
-    cat <<EOF > tcl86-system-malloc.patch
+              if [ ! -f "tdom/${version_tdom_git}" ] ; then
+	              #
+	              # get the newest version of tDOM
+	              #
+	              rm -rf tdom
+	              echo "get  tDOM via: git clone https://github.com/tDOM/tdom.git"
+	              git clone https://github.com/tDOM/tdom.git
+	              # cd tdom
+	              # git checkout 'master@{2012-12-31 00:00:00}'
+                  # cd ..
+              fi
+          fi
+
+          #exit
+          echo "------------------------ Installing Tcl ---------------------------------"
+          set -o errexit
+
+          ${tar} xfz tcl${version_tcl}-src.tar.gz
+
+
+          if [ $with_system_malloc = "1" ] ; then
+              cd tcl${version_tcl}
+              cat <<EOF > tcl86-system-malloc.patch
 Index: generic/tclThreadAlloc.c
 ==================================================================
 --- generic/tclThreadAlloc.c
@@ -664,7 +670,7 @@ Index: generic/tclThreadAlloc.c
 @@ -519,10 +545,11 @@
  	memcpy(newPtr, ptr, reqSize);
  	TclpFree(ptr);
-     }
+ }
      return newPtr;
  }
 +#endif
@@ -674,152 +680,152 @@ Index: generic/tclThreadAlloc.c
   *
   * TclThreadAllocObj --
 EOF
-    echo "patching Tcl with SYSTEM malloc patch ..."
-    patch -p0 < tcl86-system-malloc.patch
-    echo "patching Tcl with SYSTEM malloc patch DONE"
-    cd ..
-fi
+              echo "patching Tcl with SYSTEM malloc patch ..."
+              patch -p0 < tcl86-system-malloc.patch
+              echo "patching Tcl with SYSTEM malloc patch DONE"
+              cd ..
+          fi
 
 
-cd tcl${version_tcl}/unix
-#./configure --enable-threads --prefix=${ns_install_dir} --with-naviserver=${ns_install_dir}
-./configure --enable-threads --prefix=${ns_install_dir}
-${make}
-${make} install
+          cd tcl${version_tcl}/unix
+          #./configure --enable-threads --prefix=${ns_install_dir} --with-naviserver=${ns_install_dir}
+          ./configure --enable-threads --prefix=${ns_install_dir}
+          ${make}
+          ${make} install
 
-# Make sure, we have a tclsh in ns/bin
-if [ -f ${ns_install_dir}/bin/tclsh ] ; then
-    rm ${ns_install_dir}/bin/tclsh
-fi
-echo "sourcing ${ns_install_dir}/lib/tclConfig.sh"
-source ${ns_install_dir}/lib/tclConfig.sh
-echo "symbolic linking ${ns_install_dir}/bin/tclsh${version_tcl_major} ${ns_install_dir}/bin/tclsh"
-ln -sf ${ns_install_dir}/bin/tclsh${version_tcl_major} ${ns_install_dir}/bin/tclsh
+          # Make sure, we have a tclsh in ns/bin
+          if [ -f ${ns_install_dir}/bin/tclsh ] ; then
+              rm ${ns_install_dir}/bin/tclsh
+          fi
+          echo "sourcing ${ns_install_dir}/lib/tclConfig.sh"
+          source ${ns_install_dir}/lib/tclConfig.sh
+          echo "symbolic linking ${ns_install_dir}/bin/tclsh${version_tcl_major} ${ns_install_dir}/bin/tclsh"
+          ln -sf ${ns_install_dir}/bin/tclsh${version_tcl_major} ${ns_install_dir}/bin/tclsh
 
-cd ../..
+          cd ../..
 
-echo "------------------------ Installing Tcllib ------------------------------"
+          echo "------------------------ Installing Tcllib ------------------------------"
 
-${tar} xvfj ${tcllib_dirname}-${version_tcllib}.tar.bz2
-cd ${tcllib_dirname}-${version_tcllib}
-./configure --prefix=${ns_install_dir}
-${make} install
-cd ..
+          ${tar} xvfj ${tcllib_dirname}-${version_tcllib}.tar.bz2
+          cd ${tcllib_dirname}-${version_tcllib}
+          ./configure --prefix=${ns_install_dir}
+          ${make} install
+          cd ..
 
-echo "------------------------ Installing NaviServer ---------------------------"
+          echo "------------------------ Installing NaviServer ---------------------------"
 
-cd ${build_dir}
+          cd ${build_dir}
 
-if [ ! ${version_ns} = "HEAD" ] ; then
-    ${tar} zxvf naviserver-${version_ns}.tar.gz
-    cd naviserver-${version_ns}
-    ./configure --with-tcl=${ns_install_dir}/lib --prefix=${ns_install_dir}
-else
-    cd naviserver
-    if [ ! -f naviserver/configure ] ; then
-        bash autogen.sh --with-tcl=${ns_install_dir}/lib --prefix=${ns_install_dir}
-    else
-        ./configure --with-tcl=${ns_install_dir}/lib --prefix=${ns_install_dir}
-    fi
-fi
+          if [ ! ${version_ns} = "HEAD" ] ; then
+              ${tar} zxvf naviserver-${version_ns}.tar.gz
+              cd naviserver-${version_ns}
+              ./configure --with-tcl=${ns_install_dir}/lib --prefix=${ns_install_dir}
+          else
+              cd naviserver
+              if [ ! -f naviserver/configure ] ; then
+                  bash autogen.sh --with-tcl=${ns_install_dir}/lib --prefix=${ns_install_dir}
+              else
+                  ./configure --with-tcl=${ns_install_dir}/lib --prefix=${ns_install_dir}
+              fi
+          fi
 
-${make}
+          ${make}
 
-if [ ${version_ns} = "HEAD" ] ; then
-    ${make} "DTPLITE=${ns_install_dir}/bin/tclsh $ns_install_dir/bin/dtplite" build-doc
-fi
-${make} install
-cd ..
+          if [ ${version_ns} = "HEAD" ] ; then
+              ${make} "DTPLITE=${ns_install_dir}/bin/tclsh $ns_install_dir/bin/dtplite" build-doc
+          fi
+          ${make} install
+          cd ..
 
-echo "------------------------ Installing Modules/nsdbpg ----------------------"
-if [ $with_postgres_driver = "1" ] ; then
-cd ${build_dir}
-if [ ! ${version_modules} = "HEAD" ] ; then
-    ${tar} zxvf naviserver-${version_modules}-modules.tar.gz
-fi
-cd modules/nsdbpg
-${make} PGLIB=${pg_lib} PGINCLUDE=${pg_incl} NAVISERVER=${ns_install_dir}
-${make} NAVISERVER=${ns_install_dir} install
-cd ../..
-fi
+          echo "------------------------ Installing Modules/nsdbpg ----------------------"
+          if [ $with_postgres_driver = "1" ] ; then
+              cd ${build_dir}
+              if [ ! ${version_modules} = "HEAD" ] ; then
+                  ${tar} zxvf naviserver-${version_modules}-modules.tar.gz
+              fi
+              cd modules/nsdbpg
+              ${make} PGLIB=${pg_lib} PGINCLUDE=${pg_incl} NAVISERVER=${ns_install_dir}
+              ${make} NAVISERVER=${ns_install_dir} install
+              cd ../..
+          fi
 
-echo "------------------------ Installing Tcl Thread library -----------------------"
+          echo "------------------------ Installing Tcl Thread library -----------------------"
 
 
-${tar} xfz thread${version_thread}.tar.gz
-cd thread${version_thread}/unix/
-../configure --enable-threads --prefix=${ns_install_dir} --exec-prefix=${ns_install_dir} --with-naviserver=${ns_install_dir} --with-tcl=${ns_install_dir}/lib
-make
-${make} install
-cd ../..
+          ${tar} xfz thread${version_thread}.tar.gz
+          cd thread${version_thread}/unix/
+          ../configure --enable-threads --prefix=${ns_install_dir} --exec-prefix=${ns_install_dir} --with-naviserver=${ns_install_dir} --with-tcl=${ns_install_dir}/lib
+          make
+          ${make} install
+          cd ../..
 
-if [ $with_mongo = "1" ] ; then
-    echo "------------------------ MongoDB-driver ----------------------------------"
+          if [ $with_mongo = "1" ] ; then
+              echo "------------------------ MongoDB-driver ----------------------------------"
 
-    cd mongo-c-driver
-    cmake.
-    ${make}
-    ${make} install
-    if [ $debian = "1" ] ; then
-	    ldconfig -v
-    fi
-    if [ $redhat = "1" ] ; then
-	    ldconfig -v
-    fi
-    cd ..
-fi
+              cd mongo-c-driver
+              cmake.
+              ${make}
+              ${make} install
+              if [ $debian = "1" ] ; then
+	              ldconfig -v
+              fi
+              if [ $redhat = "1" ] ; then
+	              ldconfig -v
+              fi
+              cd ..
+          fi
 
-echo "------------------------ Installing XOTcl 2.* (with_mongo ${with_mongo}) ---"
+          echo "------------------------ Installing XOTcl 2.* (with_mongo ${with_mongo}) ---"
 
-if [ ! ${version_xotcl} = "HEAD" ] ; then
-    ${tar} xvfz nsf${version_xotcl}.tar.gz
-    cd nsf${version_xotcl}
-else
-    cd nsf
-fi
+          if [ ! ${version_xotcl} = "HEAD" ] ; then
+              ${tar} xvfz nsf${version_xotcl}.tar.gz
+              cd nsf${version_xotcl}
+          else
+              cd nsf
+          fi
 
-#export CC=gcc
-if [ $with_mongo = "1" ] ; then
-    ./configure --enable-threads --enable-symbols \
-		--prefix=${ns_install_dir} --exec-prefix=${ns_install_dir} --with-tcl=${ns_install_dir}/lib \
-		--with-nsf=../../ \
-		--with-mongoc=/usr/local/include/libmongoc-1.0/,/usr/local/lib/ \
-		--with-bson=/usr/local/include/libbson-1.0,/usr/local/lib/
-else
-    ./configure --enable-threads --enable-symbols \
-		--prefix=${ns_install_dir} --exec-prefix=${ns_install_dir} --with-tcl=${ns_install_dir}/lib
-fi
+          #export CC=gcc
+          if [ $with_mongo = "1" ] ; then
+              ./configure --enable-threads --enable-symbols \
+		                  --prefix=${ns_install_dir} --exec-prefix=${ns_install_dir} --with-tcl=${ns_install_dir}/lib \
+		                  --with-nsf=../../ \
+		                  --with-mongoc=/usr/local/include/libmongoc-1.0/,/usr/local/lib/ \
+		                  --with-bson=/usr/local/include/libbson-1.0,/usr/local/lib/
+          else
+              ./configure --enable-threads --enable-symbols \
+		                  --prefix=${ns_install_dir} --exec-prefix=${ns_install_dir} --with-tcl=${ns_install_dir}/lib
+          fi
 
-${make}
-${make} install
-cd ..
+          ${make}
+          ${make} install
+          cd ..
 
-echo "------------------------ Installing tDOM --------------------------------"
+          echo "------------------------ Installing tDOM --------------------------------"
 
-if [ ${version_tdom} = "GIT" ] ; then
-    cd tdom
-    if [ ! -f "${version_tdom_git}" ] ; then
-	git checkout "${version_tdom_git}"
-	echo > "${version_tdom_git}"
-    fi
+          if [ ${version_tdom} = "GIT" ] ; then
+              cd tdom
+              if [ ! -f "${version_tdom_git}" ] ; then
+	              git checkout "${version_tdom_git}"
+	              echo > "${version_tdom_git}"
+              fi
 
-    cd unix
-else
-    #${tar} xfz tDOM-${version_tdom}.tgz
-    cd tDOM-${tdom_base}/unix
-fi
-../configure --enable-threads --disable-tdomalloc --prefix=${ns_install_dir} --exec-prefix=${ns_install_dir} --with-tcl=${ns_install_dir}/lib
-${make} install
+              cd unix
+          else
+              #${tar} xfz tDOM-${version_tdom}.tgz
+              cd tDOM-${tdom_base}/unix
+          fi
+          ../configure --enable-threads --disable-tdomalloc --prefix=${ns_install_dir} --exec-prefix=${ns_install_dir} --with-tcl=${ns_install_dir}/lib
+          ${make} install
 
-cd ../..
+          cd ../..
 
-echo "------------------------ Set permissions --------------------------------"
+          echo "------------------------ Set permissions --------------------------------"
 
-# set up minimal permissions in ${ns_install_dir}
-chgrp -R ${ns_group} ${ns_install_dir}
-chmod -R g+w ${ns_install_dir}
+          # set up minimal permissions in ${ns_install_dir}
+          chgrp -R ${ns_group} ${ns_install_dir}
+          chmod -R g+w ${ns_install_dir}
 
-echo "
+          echo "
 
 Congratulations, you have installed NaviServer.
 
