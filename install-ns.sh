@@ -27,17 +27,18 @@ build_dir=/usr/local/src
 #build_dir=/usr/local/src/oo2
 ns_install_dir=/usr/local/ns
 #ns_install_dir=/usr/local/oo2
-version_ns=4.99.16
+version_ns=4.99.19
 #version_ns=HEAD
 version_modules=${version_ns}
 #version_modules=HEAD
 #version_tcl=8.5.19
-version_tcl=8.6.8
+version_tcl=8.6.10
 version_tcl_major=8.5
-version_tcllib=1.19
+version_tcllib=1.20
 tcllib_dirname=tcllib
-version_thread=2.8.2
-#version_xotcl=2.2.0
+#version_thread=2.8.2
+version_thread=2.8.5
+#version_xotcl=2.3.0
 version_xotcl=HEAD
 #version_tdom=GIT
 version_tdom=0.9.1
@@ -115,10 +116,12 @@ if [ $uname = "Darwin" ] ; then
     
     
     if [ $with_postgres = "1" ] ; then
-	    # Preconfigured for PostgreSQL 9.6 installed via mac ports
-	    pg_incl=/opt/local/include/postgresql96/
-	    pg_lib=/opt/local/lib/postgresql96/
-	    pg_packages="postgresql96 postgresql96-server"
+    
+	# Preconfigured for PostgreSQL 12 installed via MacPorts
+	pg_incl=/opt/local/include/postgresql12/
+	pg_lib=/opt/local/lib/postgresql12/
+	pg_packages="postgresql12 postgresql12-server"
+
     fi
 else
     #
@@ -171,9 +174,10 @@ else
         fi
     elif { ${uname} = "OpenBSD" ] ; then
 	make="gmake"
-	setenv LIBS=-lpthread
+	#setenv LIBS=-lpthread
     	pg_incl=/usr/local/include/postgresql
 	pg_lib=/usr/local/lib
+        openbsd=1
     fi
 fi
 
@@ -192,7 +196,7 @@ if [ $freebsd = "1" ] ; then
     echo "
 
 This script requires these packages:
-  gmake clang38 automake
+  gmake livm automake
   openssl
   wget curl
   zip unzip
@@ -215,9 +219,10 @@ and set variables using standard bash syntax like this:
 
 The script has a long heritage:
 (c) 2008      Malte Sussdorff, Nima Mazloumi
-(c) 2012-2018 Gustaf Neumann
+(c) 2012-2020 Gustaf Neumann
 
-Tested under macos, Ubuntu 12.04, 13.04, 14.04, 16.04, 18.04 Fedora Core 18, and CentOS 7 (pg 9.4.5)
+Tested under macos, Ubuntu 12.04, 13.04, 14.04, 16.04, 18.04, Raspbian 9.4,
+             OmniOS r151014, OpenBSD 6.1, 6.3, 6.6, Fedora Core 18, and CentOS 7 (pg 9.4.5)
 
 LICENSE    This program comes with ABSOLUTELY NO WARRANTY;
            This is free software, and you are welcome to redistribute it under certain conditions;
@@ -232,12 +237,13 @@ SETTINGS   Dev install? 1=yes     ${dev_p}
            Thread                 ${version_thread}
            NSF/NX/XOTcl           ${version_xotcl}
            Tcl                    ${version_tcl}
+           Tcl with system malloc ${with_system_malloc}
            tDOM                   ${version_tdom}
            NaviSever user         ${ns_user}
            NaviServer group       ${ns_group}
            Make command           ${make}
            Type command           ${type}
-           With Mongo             ${with_mongo}
+           With MongoDB           ${with_mongo}
            With PostgreSQL        ${with_postgres}
            With PostgreSQL driver ${with_postgres_driver}
            PostgreSQL user        ${pg_user}
@@ -352,26 +358,25 @@ if [ $? != "0" ] ; then
     fi
 fi
 
-echo "------------------------ System dependencies ---------------------------------"
+echo "------------------------ System Dependencies ---------------------------------"
 if [ $with_mongo = "1" ] ; then
     mongodb="mongodb libtool autoconf"
 else
     mongodb=
 fi
 
-if [ $with_mongo = "1" ] || [ $version_xotcl = "HEAD" ] || [ $version_tdom = "GIT" ]    ; then
+if [ $with_mongo = "1" ] || [ $version_xotcl = "HEAD" ] || [ $version_tdom = "GIT" ] || [ $version_ns = "HEAD" ]; then
     git=git
 else
     git=
 fi
 
 if [ $version_ns = "HEAD" ] ; then
-    mercurial=mercurial
     autoconf=autoconf
 else
-    mercurial=
     autoconf=
 fi
+mercurial=
 
 if [ $debian = "1" ] ; then
     # On Debian/Ubuntu, make sure we have zlib installed, otherwise
@@ -386,7 +391,7 @@ if [ $redhat = "1" ] ; then
         pkgmanager=yum
     fi
 
-    ${pkgmanager} install make ${autoconf} gcc zlib zlib-devel wget curl zip unzip openssl openssl-devel ${pg_packages} ${mercurial} ${git} ${mongodb}
+    ${pkgmanager} install make ${autoconf} automake gcc zlib zlib-devel wget curl zip unzip openssl openssl-devel ${pg_packages} ${mercurial} ${git} ${mongodb}
     
 fi
 
@@ -394,11 +399,23 @@ if [ $macosx = "1" ] ; then
     port install make ${autoconf} zlib wget curl zip unzip openssl ${pg_packages} ${mercurial} ${git} ${mongodb}
 fi
 
+if [ $openbsd = "1" ] ; then
+    #export PKG_PATH=https://ftp.eu.openbsd.org/pub/OpenBSD/6.3/packages/`machine -a`/
+    export AUTOCONF_VERSION=2.69
+    export AUTOMAKE_VERSION=1.15
+    #
+    # OpenBSD does not require a build with OpenSSL (libreSSL works as
+    # well), but NaviServer gets more functionality by using recent
+    # versions of OpenSSL.
+    #
+    pkg_add gcc openssl wget ${git} curl zip unzip bash gmake ${mercurial} ${mongodb} ${pg_packages} autoconf-2.69p2 automake-1.15.1
+fi
+
 if [ $sunos = "1" ] ; then
     # packages for OpenSolaris/OmniOS
-    pkg install pkg://omnios/developer/versioning/git mercurial ${autoconf} automake gcc48 zlib wget \
+    pkg install pkg://omnios/developer/versioning/git mercurial ${autoconf} automake /developer/gcc51g zlib wget \
         curl compress/zip compress/unzip \
-	    ${pg_packages} ${mercurial} ${mongodb}
+	    ${pg_packages} ${mercurial} ${git} ${mongodb}
     pkg install \
 	    developer/object-file \
 	    developer/linker \
@@ -408,7 +425,7 @@ if [ $sunos = "1" ] ; then
 	    system/library/math/header-math \
             archiver/gnu-tar
 
-    ln -s /opt/gcc-4.8.1/bin/gcc /bin/gcc
+    #ln -s /opt/gcc-4.8.1/bin/gcc /bin/gcc
              tar="gtar"
 fi
 
@@ -416,7 +433,7 @@ fi
 # Just give a message in the main screen about these dependencies.
 # FreeBSD offers multiple package managers. Portmaster, ports, binaries..
 
-#portmaster -D --no-confirm devel/gmake lang/clang38 security/openssl devel/automake ftp/wget ftp/curl archivers/zip archivers/unzip devel/autoconf devel/git devel/cvs devel/mercurial ${pg_packages} ${mongodb}
+#portmaster -D --no-confirm devel/gmake devel/llvm security/openssl devel/automake ftp/wget ftp/curl archivers/zip archivers/unzip devel/autoconf devel/git devel/cvs devel/mercurial ${pg_packages} ${mongodb}
 # portmaster -aD --no-confirm
 #fi
 
@@ -443,11 +460,10 @@ if [ ! ${version_ns} = "HEAD" ] ; then
     fi
 else
     if [ ! -d naviserver ] ; then
-	    hg clone https://bitbucket.org/naviserver/naviserver
+	    git clone https://bitbucket.org/naviserver/naviserver
     else
 	    cd naviserver
-	    hg pull
-	    hg update
+	    git pull
 	    cd ..
     fi
 
@@ -471,15 +487,14 @@ else
 	    nsexample nsgdchart nssavi nssys nszlib nsaspell \
 	    nsclamav nsexpat nsimap nssip nstftpd \
 	    nssyslogd nsldapd nsradiusd nsphp nsstats nsconf \
-	    nsdhcpd nsrtsp nsauthpam nsmemcache nsssl \
+	    nsdhcpd nsrtsp nsauthpam nsmemcache \
 	    nsvfs nsdbi nsdbipg nsdbilite nsdbimy
     do
 	    if [ ! -d $d ] ; then
-	        hg clone http://bitbucket.org/naviserver/$d
+	        git clone http://bitbucket.org/naviserver/$d
 	    else
 	        cd $d
-	        hg pull
-	        hg update
+	        git pull
 	        cd ..
 	    fi
     done
@@ -546,11 +561,128 @@ else
 fi
 
 #exit
-echo "------------------------ Installing TCL ---------------------------------"
+echo "------------------------ Installing Tcl ---------------------------------"
 set -o errexit
 
 ${tar} xfz tcl${version_tcl}-src.tar.gz
+
+
+if [ $with_system_malloc = "1" ] ; then
+    cd tcl${version_tcl}
+    cat <<EOF > tcl86-system-malloc.patch
+Index: generic/tclThreadAlloc.c
+==================================================================
+--- generic/tclThreadAlloc.c
++++ generic/tclThreadAlloc.c
+@@ -305,11 +305,19 @@
+  * Side effects:
+  *	May allocate more blocks for a bucket.
+  *
+  *----------------------------------------------------------------------
+  */
+-
++#define SYSTEM_MALLOC 1
++#if defined(SYSTEM_MALLOC)
++char *
++TclpAlloc(
++    unsigned int numBytes)     /* Number of bytes to allocate. */
++{
++    return (char*) malloc(numBytes);
++}
++#else 
+ char *
+ TclpAlloc(
+     unsigned int reqSize)
+ {
+     Cache *cachePtr;
+@@ -366,10 +374,11 @@
+     if (blockPtr == NULL) {
+ 	return NULL;
+     }
+     return Block2Ptr(blockPtr, bucket, reqSize);
+ }
++#endif
+ 
+ /*
+  *----------------------------------------------------------------------
+  *
+  * TclpFree --
+@@ -382,11 +391,19 @@
+  * Side effects:
+  *	May move blocks to shared cache.
+  *
+  *----------------------------------------------------------------------
+  */
+-
++#if defined(SYSTEM_MALLOC)
++void
++TclpFree(
++    char *ptr)         /* Pointer to memory to free. */
++{
++    free(ptr);
++    return;
++}
++#else 
+ void
+ TclpFree(
+     char *ptr)
+ {
+     Cache *cachePtr;
+@@ -425,10 +442,11 @@
+     if (cachePtr != sharedPtr &&
+ 	    cachePtr->buckets[bucket].numFree > bucketInfo[bucket].maxBlocks) {
+ 	PutBlocks(cachePtr, bucket, bucketInfo[bucket].numMove);
+     }
+ }
++#endif
+ 
+ /*
+  *----------------------------------------------------------------------
+  *
+  * TclpRealloc --
+@@ -441,11 +459,19 @@
+  * Side effects:
+  *	Previous memory, if any, may be freed.
+  *
+  *----------------------------------------------------------------------
+  */
+-
++#if defined(SYSTEM_MALLOC)
++char *
++TclpRealloc(
++    char *oldPtr,              /* Pointer to allocated block. */
++    unsigned int numBytes)     /* New size of memory. */
++{
++    return realloc(oldPtr, numBytes);
++}
++#else
+ char *
+ TclpRealloc(
+     char *ptr,
+     unsigned int reqSize)
+ {
+@@ -519,10 +545,11 @@
+ 	memcpy(newPtr, ptr, reqSize);
+ 	TclpFree(ptr);
+     }
+     return newPtr;
+ }
++#endif
+ 
+ /*
+  *----------------------------------------------------------------------
+  *
+  * TclThreadAllocObj --
+EOF
+    echo "patching Tcl with SYSTEM malloc patch ..."
+    patch -p0 < tcl86-system-malloc.patch
+    echo "patching Tcl with SYSTEM malloc patch DONE"
+    cd ..
+fi
+
+
 cd tcl${version_tcl}/unix
+#./configure --enable-threads --prefix=${ns_install_dir} --with-naviserver=${ns_install_dir}
 ./configure --enable-threads --prefix=${ns_install_dir}
 ${make}
 ${make} install
@@ -566,7 +698,7 @@ ln -sf ${ns_install_dir}/bin/tclsh${version_tcl_major} ${ns_install_dir}/bin/tcl
 
 cd ../..
 
-echo "------------------------ Installing TCLLib ------------------------------"
+echo "------------------------ Installing Tcllib ------------------------------"
 
 ${tar} xvfj ${tcllib_dirname}-${version_tcllib}.tar.bz2
 cd ${tcllib_dirname}-${version_tcllib}

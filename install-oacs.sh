@@ -46,28 +46,29 @@ ns_install_dir=/usr/local/ns
 #      released (similar to a tar file produced at the time of
 #      a release of the main OpenACS packages).
 #
-# For tar releases, one should
+# One can obtain the OpenACS sources either via tar file or via
+# cvs. When "oacs_tar_release_url" is non-empty, it is used and the CVS tags
+# are ignored. Otherwise, a checkout from CVS is used based
+# on "oacs_core_tag" and "oacs_packages_tag".
+#
 
 oacs_version=5-9-1
 #oacs_version=HEAD
 
 #oacs_core_tag=HEAD
 #oacs_core_tag=oacs-5-9
+#oacs_core_tag=oacs-5-10
 oacs_core_tag=openacs-5-9-compat
 #oacs_core_tag=openacs-5-9-0-final
 
 #oacs_packages_tag=HEAD
 #oacs_packages_tag=oacs-5-9
+#oacs_packages_tag=oacs-5-10
 oacs_packages_tag=openacs-5-9-compat
 #oacs_packages_tag=openacs-5-9-0-final
 
-#
-# One can obtain the OpenACS sources either via tar file or via
-# cvs. When oacs_tar_release is non-empty, it is used and the CVS tags
-# are ignored.
-#
 oacs_tar_release=openacs-5.9.1
-oacs_tar_release_url=http://openacs.org/projects/openacs/download/download/${oacs_tar_release}.tar.gz?revision_id=5373766
+oacs_tar_release_url=https://openacs.org/projects/openacs/download/download/${oacs_tar_release}.tar.gz?revision_id=5373766
 #oacs_tar_release_url=
 
 
@@ -77,6 +78,9 @@ pg_dir=/usr
 
 oacs_service=oacs-${oacs_version}
 
+#
+# End of configuration block.
+#
 
 source ${ns_install_dir}/lib/nsConfig.sh
 if [ "$ns_user" = "" ] ; then
@@ -95,7 +99,7 @@ install_dotlrn=0
 #
 #build_dir=/usr/local/src
 #with_postgres=1
-#ns_src_dir=/usr/local/src/naviserver-4.99.6
+#ns_src_dir=/usr/local/src/naviserver-4.99.17
 
 oacs_user=${ns_user}
 oacs_group=${ns_group}
@@ -156,8 +160,8 @@ LICENSE    This program comes with ABSOLUTELY NO WARRANTY;
            This is free software, and you are welcome to redistribute it under certain conditions;
            For details see http://www.gnu.org/licenses.
 
-SETTINGS   OpenACS version              ${oacs_core_tag}
-           OpenACS packages             ${oacs_packages_tag}
+SETTINGS   OpenACS core tag             ${oacs_core_tag}
+           OpenACS packages tag         ${oacs_packages_tag}
            OpenACS tar release URL      ${oacs_tar_release_url}
            OpenACS directory            ${oacs_dir}
            OpenACS service              ${oacs_service}
@@ -299,7 +303,7 @@ if [ "$dbuser_exists" = "1" ] ; then
     echo "db user ${oacs_user} exists. "
 else
     echo "Creating oacs_user ${oacs_user}. "
-    su ${pg_user} -c "${pg_dir}/bin/createuser -a -d ${oacs_user}"
+    su ${pg_user} -c "${pg_dir}/bin/createuser -s -d ${oacs_user}"
 fi
 
 echo "Checking if db ${db_name} exists."
@@ -342,21 +346,42 @@ if [ "$oacs_tar_release_url" = "" ] ; then
     fi
 fi
 
-mkdir -p ${oacs_dir}
+mkdir -p ${oacs_dir}/log
 cd ${oacs_dir}
 
 if [ "$oacs_tar_release_url" = "" ] ; then
 
     cvs -q -d:pserver:anonymous@cvs.openacs.org:/cvsroot checkout -r ${oacs_core_tag} acs-core
-    ln -sf $(echo openacs-4/[a-z]*) .
+    if [ ! -d "www" ] ; then
+        ln -sf $(echo openacs-4/[a-z]*) .
+    fi
+
     cd ${oacs_dir}/packages
     cvs -d:pserver:anonymous@cvs.openacs.org:/cvsroot -q checkout -r ${oacs_packages_tag} xotcl-all
     cvs -d:pserver:anonymous@cvs.openacs.org:/cvsroot -q checkout -r ${oacs_packages_tag} xowf
     cvs -d:pserver:anonymous@cvs.openacs.org:/cvsroot -q checkout -r ${oacs_packages_tag} acs-developer-support ajaxhelper
 
+   if [ ! -d "richtext-ckeditor4" ] ; then
+	cvs -d:pserver:anonymous@cvs.openacs.org:/cvsroot -q checkout -r ${oacs_packages_tag} openacs-4/packages/richtext-ckeditor4
+	mv  openacs-4/packages/richtext-ckeditor4 .
+	rm -rf openacs-4/packages
+    else
+	cd richtext-ckeditor4
+	cvs -d:pserver:anonymous@cvs.openacs.org:/cvsroot -q up
+	cd ..
+    fi
+
     if [ $install_dotlrn = "1" ] ; then
 	cvs -d:pserver:anonymous@cvs.openacs.org:/cvsroot -q checkout -r ${oacs_packages_tag} dotlrn-all
     fi
+
+    cd ${oacs_dir}
+
+    cp ${oacs_dir}/packages/acs-bootstrap-installer/installer/www/*.* ${oacs_dir}/www/
+    mkdir -p ${oacs_dir}/www/SYSTEM/
+    cp ${oacs_dir}/packages/acs-bootstrap-installer/installer/www/SYSTEM/*.* ${oacs_dir}/www/SYSTEM
+    cp ${oacs_dir}/packages/acs-bootstrap-installer/installer/tcl/*.* ${oacs_dir}/tcl/
+
 elif [ "${xdcpm}" = "xdcpm" ] ; then
     git clone https://github.com/${xdcpm}/openacs-core.git
     mv openacs-core ${oacs_core_dir}
@@ -396,6 +421,22 @@ fi
 mkdir -p ${oacs_dir}/www/admin/
 cp ${modules_src_dir}/nsstats/nsstats.tcl ${oacs_dir}/www/admin/
 
+#
+# add self-signed certificate
+#
+certfile=${oacs_dir}/etc/certfile.pem
+echo "check for certfile ${certfile}"
+if [ ! -f "${certfile}" ] ; then
+    echo "certfile ${certfile} does not exist"
+    cd /tmp
+    openssl genrsa 1024 > host.key
+    openssl req -new -x509 -nodes -sha1 -days 365 -key host.key -subj /CN=localhost > host.cert
+    cat host.cert host.key > server.pem
+    rm -rf host.cert host.key
+    #openssl dhparam 2048 >> server.pem
+    mv server.pem ${certfile}
+    cd ${oacs_dir}
+fi
 
 
 chown -R ${oacs_user}:${oacs_group} ${oacs_dir}
@@ -424,8 +465,19 @@ if [ ${redhat} = "1" ] ; then
  	systemd=1
 fi
 if [ ${debian} = "1" ] ; then
-	upstart=1
-	if { - "/etc/lsb-release" ] ; then
+	#
+    # Check, if the debian release still has /etc/init. If so, on can
+    # generate the upstart file.
+    #
+    if [ -d "/etc/init" ] ; then
+        upstart=1
+    fi
+
+    #
+    # Nowadays, most debian releases support systemd.
+    #
+
+        if { - "/etc/lsb-release" ] ; then
 		. /etc/lsb-release
 		if dpkg -- compare-versions "$DISTRIB_RELEASE" "ge" "15.04" ; then
 			systemd=1
@@ -530,16 +582,16 @@ Congratulations, you have installed OpenACS with NaviServer on your machine.
 You might start the server manually with
 
     sudo ${ns_install_dir}/bin/nsd -t ${config_tcl_dir}/config-${oacs_service}.tcl -u ${oacs_user} -g ${oacs_group}"
-if [ "${redhat}" = "1" ] ; then
+if [ "${systemd}" = "1" ] ; then
 echo "
-or you can manage your installation with systemd (RedHat, Fedora Core). In this case,
+or you can manage your installation with systemd. In this case,
 you might use the following commands
 
     systemctl status ${oacs_service}
     systemctl start ${oacs_service}
     systemctl stop ${oacs_service}
 "
-elif [ "${debian}" = "1" ] ; then
+elif [ "${upstart}" = "1" ] ; then
 echo "
 or you can manage your installation with upstart (Ubuntu/Debian). In this case,
 you might use the following commands
