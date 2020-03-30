@@ -172,7 +172,7 @@ else
             echo "bash is not installed. Please install bash before continuing."
             exit
         fi
-    elif { ${uname} = "OpenBSD" ] ; then
+    elif [ ${uname} = "OpenBSD" ] ; then
 	make="gmake"
 	#setenv LIBS=-lpthread
     	pg_incl=/usr/local/include/postgresql
@@ -249,9 +249,9 @@ SETTINGS   Dev install? 1=yes     ${dev_p}
            PostgreSQL user        ${pg_user}
            postgres/include       ${pg_incl}
            postgres/lib           ${pg_lib}
-           PostgreSQL Packages   ${pg_packages}
-           uname                 ${uname}
-           freebsd               ${freebsd}
+           PostgreSQL Packages    ${pg_packages}
+           uname                  ${uname}
+           freebsd                ${freebsd}
 "
 fi
 
