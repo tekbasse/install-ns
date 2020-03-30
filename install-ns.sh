@@ -49,6 +49,10 @@ tdom_tar=${tdom_base}-src.tgz
 ns_user=nsadmin
 ns_group=nsadmin
 with_mongo=0
+
+# Is this for setting a development server? set to 1
+dev_p=0
+
 #
 # The setting "with_postgres=1" means that we want to install a fresh
 # packaged PostgeSQL.
