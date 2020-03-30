@@ -48,7 +48,7 @@ ns_install_dir=/usr/local/ns
 #
 # For tar releases, one should
 
-oacs_version=5-9
+oacs_version=5-9-1
 #oacs_version=HEAD
 
 #oacs_core_tag=HEAD
@@ -66,8 +66,8 @@ oacs_packages_tag=openacs-5-9-compat
 # cvs. When oacs_tar_release is non-empty, it is used and the CVS tags
 # are ignored.
 #
-oacs_tar_release=openacs-5.9.0
-oacs_tar_release_url=http://openacs.org/projects/openacs/download/download/${oacs_tar_release}.tar.gz?revision_id=4869825
+oacs_tar_release=openacs-5.9.1
+oacs_tar_release_url=http://openacs.org/projects/openacs/download/download/${oacs_tar_release}.tar.gz?revision_id=5373766
 #oacs_tar_release_url=
 
 
@@ -75,11 +75,7 @@ oacs_tar_release_url=http://openacs.org/projects/openacs/download/download/${oac
 pg_user=postgres
 pg_dir=/usr
 
-if [ "${oacs_version}" = "HEAD" ] ; then
-    oacs_service=oacs-${oacs_version}
-else
-    oacs_service=${oacs_version}
-fi
+oacs_service=oacs-${oacs_version}
 
 
 source ${ns_install_dir}/lib/nsConfig.sh
@@ -424,8 +420,23 @@ cat << EOF > /tmp/subst.tcl
 EOF
 ${ns_install_dir}/bin/tclsh /tmp/subst.tcl
 
+if [ ${redhat} = "1" ] ; then
+ 	systemd=1
+fi
+if [ ${debian} = "1" ] ; then
+	upstart=1
+	if { - "/etc/lsb-release" ] ; then
+		. /etc/lsb-release
+		if dpkg -- compare-versions "$DISTRIB_RELEASE" "ge" "15.04" ; then
+			systemd=1
+		fi
+	elif [ -d "/lib/systemd/system" ] ; then
+		systemd=1
+	fi
+fi
 
-if [ "${redhat}" = "1" ] ; then
+
+if [ "${systemd}" = "1" ] ; then
 echo "Writing /lib/systemd/system/${oacs_service}.service"
 cat <<EOF > /lib/systemd/system/${oacs_service}.service
 [Unit]
