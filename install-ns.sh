@@ -27,17 +27,23 @@ build_dir=/usr/local/src
 #build_dir=/usr/local/src/oo2
 ns_install_dir=/usr/local/ns
 #ns_install_dir=/usr/local/oo2
+
 version_ns=4.99.19
 #version_ns=HEAD
+
 version_modules=${version_ns}
 #version_modules=HEAD
+
 #version_tcl=8.5.19
 version_tcl=8.6.10
-version_tcl_major=8.5
+version_tcl_major=8.6
+
 version_tcllib=1.20
 tcllib_dirname=tcllib
+
 #version_thread=2.8.2
 version_thread=2.8.5
+
 #version_xotcl=2.3.0
 version_xotcl=HEAD
 
@@ -50,6 +56,7 @@ with_system_malloc=0
 
 ns_user=nsadmin
 ns_group=nsadmin
+
 with_mongo=0
 
 # Is this for setting a development server? set to 1
@@ -819,7 +826,7 @@ EOF
           else
               cd /usr/local/src
               #${tar} xfz tDOM-${version_tdom}.tgz
-              cd tDOM-${tdom_base}/unix
+              cd ${tdom_base}/unix
           fi
           ../configure --enable-threads --disable-tdomalloc --prefix=${ns_install_dir} --exec-prefix=${ns_install_dir} --with-tcl=${ns_install_dir}/lib
           ${make} install

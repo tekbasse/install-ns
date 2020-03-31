@@ -74,7 +74,8 @@ oacs_tar_release_url=https://openacs.org/projects/openacs/download/download/${oa
 
 
 pg_user=postgres
-pg_dir=/usr
+# pg_dir is prefix for "/bin/psql"
+pg_dir=/usr/local
 
 oacs_service=oacs-${oacs_version}
 
@@ -312,7 +313,7 @@ if [ "$db_exists" != "1" ] ; then
     echo "Creating db ${db_name}."
     su ${pg_user} -c "${pg_dir}/bin/createdb -E UNICODE ${db_name}"
     #su ${pg_user} -c "${pg_dir}/bin/psql -d ${db_name} -f ${pg_dir}/share/postgresql/contrib/hstore.sql"
-    su ${pg_user} -c "${pg_dir}/bin/psql -d ${db_name} -tAc \"create extension hstore\""
+    su ${pg_user} -c "${pg_dir}/bin/psql -d ${Db_name} -tAc \"create extension hstore\""
 fi
 
 echo "------------------------ Download OpenACS ----------------------------"
@@ -477,7 +478,7 @@ if [ ${debian} = "1" ] ; then
     # Nowadays, most debian releases support systemd.
     #
 
-        if { - "/etc/lsb-release" ] ; then
+        if [ -d "/etc/lsb-release" ] ; then
 		. /etc/lsb-release
 		if dpkg -- compare-versions "$DISTRIB_RELEASE" "ge" "15.04" ; then
 			systemd=1
