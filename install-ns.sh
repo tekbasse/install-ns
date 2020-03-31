@@ -40,11 +40,13 @@ tcllib_dirname=tcllib
 version_thread=2.8.5
 #version_xotcl=2.3.0
 version_xotcl=HEAD
+
 #version_tdom=GIT
 version_tdom=0.9.1
 version_tdom_git="master@{2014-11-01 00:00:00}"
 tdom_base=tdom-${version_tdom}
 tdom_tar=${tdom_base}-src.tgz
+with_system_malloc=0
 
 ns_user=nsadmin
 ns_group=nsadmin
@@ -200,7 +202,7 @@ if [ $freebsd = "1" ] ; then
     echo "
 
 This script requires these packages:
-  gmake livm automake
+  gmake llvm automake
   openssl
   wget curl
   zip unzip
@@ -815,6 +817,7 @@ EOF
 
               cd unix
           else
+              cd /usr/local/src
               #${tar} xfz tDOM-${version_tdom}.tgz
               cd tDOM-${tdom_base}/unix
           fi
