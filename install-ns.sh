@@ -400,7 +400,7 @@ mercurial=
 if [ $debian = "1" ] ; then
     # On Debian/Ubuntu, make sure we have zlib installed, otherwise
     # NaviServer can't provide compression support
-    apt-get install make ${autoconf} gcc zlib1g-dev wget curl zip unzip openssl libssl-dev ${pg_packages} ${mercurial} ${git} ${mongodb}
+    apt-get install make ${autoconf} gcc zlib1g-dev wget curl zip unzip openssl libssl-dev ${pg_packages} ${mercurial} ${git} ${mongodb} bzip2
          fi
           if [ $redhat = "1" ] ; then
               # packages for FC/RHL
